@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ventas</title>
+</head>
+<header>
+    <div>
+        <table>
+            <tr>
+                <td><a href="/">Ingresar y vender productos</a></td>
+                <td><a href="/datos">Productos vendidos y grafico</a></td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+<body>
+    <div class="cuerpo">
+
+        <h1>Ventas</h1>
+
+        <div class="contenedor">
+            <table id="tblVendidos" class="tblproductos">
+                <tr>
+                    <th colspan="3">
+                        <h2>Productos vendidos</h2>
+                    </th>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        Productos
+                    </td>
+                </tr>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad Vendidos</th>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+    <div id="grafico" class="grafico">
+        <h1>Cantidad de ventas realizadas</h1>
+
+    </div>
+
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+    window.addEventListener("load", () => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("get", "/productosV");
+        xhr.setRequestHeader('content-type', 'application/json');
+        xhr.onload = () => {
+            if (xhr.status == 200) {
+                var datos = JSON.parse(xhr.responseText);
+                let select = document.querySelector("#tblVendidos");
+                //___________________________   dibuja el grafico  _______________________________________________
+                let grupos = [];
+                let contador = [];
+                datos.forEach(data => {
+                    let datos = data.producto;
+                    if (!grupos[datos]) {
+                        grupos[datos] = data.cantidad;
+                    }
+                    else {
+                        grupos[datos] = Number(grupos[datos]) + Number(data.cantidad);
+                    }
+
+                })
+
+                let categorias = Object.keys(grupos);
+                let data = Object.values(grupos);
+
+                console.log(categorias, data);
+                var options = {
+                    chart: {
+                        type: 'bar'
+                    },
+                    series: [{
+                        name: 'sales',
+                        data: data
+                    }],
+                    xaxis: {
+                        categories: categorias
+                    }
+                }
+
+                var chart = new ApexCharts(document.querySelector("#grafico"), options);
+
+                chart.render();
+                //___________________________   dibuja la tabla _______________________________________________
+
+                datos.forEach(data => {
+                    let tr = document.createElement("tr");
+                    let td1 = document.createElement("td");
+                    let td2 = document.createElement("td");
+                    let td3 = document.createElement("td");
+
+                    td1.textContent = data.producto;
+                    td2.textContent = data.precio;
+                    td3.textContent = data.cantidad;
+
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    tr.appendChild(td3);
+                    select.appendChild(tr);
+                });
+
+
+                console.log(datos)
+            }
+            else {
+                console.log("error al gardar el dato")
+            }
+        }
+        let dato = "nada";
+        xhr.send(JSON.stringify(dato))
+    })
+
+</script>
+<style>
+    .grafico {
+        width: 25vw;
+        height: 25vh;
+        margin-top: 3%;
+        margin-left: 40vw;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    body {
+        background-color: rgba(255, 245, 214, 0.411);
+        margin: 0px;
+        padding: 0px;
+        /* text-align: center; */
+
+    }
+
+    a {
+        text-decoration: none;
+        color: black;
+        font-size: 1rem;
+        margin-right: 3rem;
+    }
+
+    input {
+        background-color: black;
+        color: white;
+        border-radius: 0.5rem;
+
+    }
+
+    header {
+        background-color: rgba(0, 255, 255, 0.301);
+        height: 7vh;
+        display: flex;
+        justify-content: end;
+    }
+
+    table {
+        margin-top: 3%;
+    }
+
+    .cuerpo {
+        margin-left: 30vw;
+    }
+
+    .contenedor {
+        width: 600px;
+        height: 250px;
+        overflow: auto;
+    }
+
+    .contenedor>table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tblproductos>* td,
+    th {
+        border-radius: 2rem;
+        padding: 8px;
+        text-align: left;
+        border: 1px solid black;
+
+    }
+</style>
+
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto prueba</title>
+</head>
+<header>
+    <div>
+        <table>
+            <tr>
+                <td><a href="/">Ingresar y vender productos</a></td>
+                <td><a href="/datos">Productos vendidos y grafico</a></td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+<body>
+    <div class="cuerpo">
+
+
+        <div>
+            <h1>Registrar Producto</h1>
+        </div>
+        <div>
+            <table>
+                <tr>
+                    <th colspan="2">
+                        <h2>Agregar producto</h2>
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Producto</label>
+                    </td>
+                    <td>
+                        <input type="text" id="Tipo" placeholder="Producto">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Precio unitario</label>
+                    </td>
+                    <td>
+                        <input type="number" id="precioPro" placeholder="Precio unitario">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Cantidad</label>
+                    </td>
+                    <td class="holamundo">
+                        <input type="number" id="cantidad" placeholder="cantidad">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" class="btn" id="Tipo" value="Subir" onclick="subirTipo()">
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="contenedor">
+            <table id="tblDisponibles" class="tblproductos">
+                <tr>
+                    <th colspan="3">
+                        <h2>Vender Productos</h2>
+                    </th>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <h3>Productos Disponibles</h3>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="oculto">Precio</th>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th colspan="2">Cantidad a vender</th>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+</body>
+<script>
+
+    function vender() {
+        event.preventDefault();
+        let dato = document.querySelector("#Productos").value;
+        let produc = document.querySelector("#Productos").textContent;
+        console.log(dato)
+    }
+
+
+    window.addEventListener("load", () => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("get", "/productosD");
+        xhr.setRequestHeader('content-type', 'application/json');
+        xhr.onload = () => {
+            if (xhr.status == 200) {
+                var datos = JSON.parse(xhr.responseText);
+                let select = document.querySelector("#tblDisponibles");
+
+                datos.forEach(data => {
+                    let tr = document.createElement("tr");
+                    let td = document.createElement("td");
+                    let td1 = document.createElement("td");
+                    let td2 = document.createElement("td");
+                    let td3 = document.createElement("td");
+                    let td4 = document.createElement("td");
+                    let td5 = document.createElement("td");
+                    let inpcanti = document.createElement("input")
+                    let btn = document.createElement("button");
+
+                    inpcanti.type = "Number";
+                    inpcanti.id = "cantiprodu"
+                    btn.textContent = "Vender";
+                    td.textContent = data.id;
+                    td.className = "oculto"
+                    td1.textContent = data.producto;
+                    td2.textContent = data.precio;
+                    td3.textContent = data.cantidad;
+
+
+                    btn.addEventListener("click", function () {
+                        let canti = this.parentNode.querySelector("#cantiprodu").value;
+                        let contenido = this.parentNode.querySelector("td").textContent;
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("post", "/vender");
+                        xhr.setRequestHeader('content-type', 'application/json');
+                        xhr.onload = () => {
+                            if (xhr.status === 200) {
+                                location.reload();
+                            }
+                            else {
+                                console.log("error al gardar el dato")
+                            }
+                        }
+                        let dato = [
+                            contenido,
+                            canti
+                        ]
+                        xhr.send(JSON.stringify(dato))
+                    });
+
+                    td5.appendChild(inpcanti)
+                    td4.appendChild(btn)
+                    tr.appendChild(td);
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    tr.appendChild(td3);
+                    tr.appendChild(td4);
+                    tr.appendChild(td5);
+                    tr.appendChild(btn);
+                    select.appendChild(tr);
+                });
+
+
+                console.log(datos)
+            }
+            else {
+                console.log("error al gardar el dato")
+            }
+        }
+        xhr.send(JSON.stringify())
+    })
+</script>
+<script>
+
+    function subirTipo() {
+        event.preventDefault();
+        let tipoNuevo = document.querySelector("#Tipo").value;
+        let precio = document.querySelector("#precioPro").value;
+        let cantidad = document.querySelector("#cantidad").value;
+
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("post", "/ingresarTipoP");
+        xhr.setRequestHeader('content-type', 'application/json');
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                var datos = xhr.responseText;
+                alert(datos);
+                location.reload();
+                // alert("Tipo de dato guardado")
+            }
+            else {
+                console.log("error al gardar el dato")
+            }
+        }
+        let dato = [
+            tipoNuevo,
+            precio,
+            cantidad
+        ]
+        xhr.send(JSON.stringify(dato))
+
+    }
+
+</script>
+
+<style>
+    .oculto {
+        display: none;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    body {
+        margin: 0px;
+        padding: 0px;
+        background-image: url("adam-chang-IWenq-4JHqo-unsplash.jpg");
+    }
+
+    a {
+        text-decoration: none;
+        color: black;
+        font-size: 1rem;
+        margin-right: 3rem;
+    }
+
+    input {
+        background-color: rgba(0, 155, 59, 0.411);
+        color: rgb(0, 0, 0);
+        border-radius: 0.5rem;
+        border-color: rgb(0, 102, 128);
+    }
+
+    header {
+        background-color: rgba(0, 255, 255, 0.301);
+        height: 7vh;
+        display: flex;
+        justify-content: end;
+    }
+
+    table {
+        margin-top: 3%;
+    }
+
+    .cuerpo {
+        margin-left: 45vw;
+
+    }
+</style>
+
+</html>
